@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import static cs2110.DataUtilities.SearchPolicy.*;
-import static cs2110.DataUtilities.DedupPolicy.*;
 
 /**
  * Utilities for deduplicating, sorting, and searching `View` array data.
@@ -65,16 +64,48 @@ public class DataUtilities {
      *****************************************************************************************/
 
     /**
+     * Performs a binary search on the given `views` array for the given `key` on the interval
+     * [left, right). Returns the index `i` with `left <= i <= right` consistent with the given
+     * SearchPolicy `policy` using  the given Comparator `cmp`. No modifications are made to the
+     * array `views` as a result of this method.
+     * Requires that `views` is sorted according to `cmp`.
+     * Requires that `0 <= left <= right <= views.length`.
+     */
+
+    static int binarySearchRecursive(View[] views, View key, Comparator<View> cmp, SearchPolicy policy, int left, int right) {
+        int mid = left + (right-left) / 2;
+
+        if (left >= right) return right;
+
+        if (cmp.compare(views[mid], key) == 0)  {
+            if (policy == RIGHT) {
+                left = mid+1;
+            }
+            else { // LEFT
+                right = mid;
+            }
+        }
+
+        else if (cmp.compare(views[mid], key) > 0) {
+            right = mid;
+        }
+
+        // views[mid] < key
+        else {
+            left = mid + 1;
+
+        }
+        return binarySearchRecursive(views, key, cmp, policy, left, right);
+    }
+
+    /**
      * Performs a binary search on the given `views` array for the given `key`. Returns the index
      * `i` with `0 <= i <= views.length` consistent with the given SearchPolicy `policy` using the
      * given Comparator `cmp`. No modifications are made to the array `views` as a result of this
      * method. Requires that `views` is sorted according to `cmp`.
      */
     static int binarySearch(View[] views, View key, Comparator<View> cmp, SearchPolicy policy) {
-        // TODO 1: Implement this method according to its specifications. Your implementation must
-        //  be recursive, include no loops, and have O(log N) worst-case runtime and space
-        //  complexities, where N = `views.length`. Consider delegating work to a helper method.
-        throw new UnsupportedOperationException();
+        return binarySearchRecursive(views, key, cmp, policy, 0, views.length);
     }
 
     /**
