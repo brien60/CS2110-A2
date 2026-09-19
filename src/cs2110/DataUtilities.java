@@ -128,9 +128,15 @@ public class DataUtilities {
      */
     static View[] deduplicatingSort(View[] views, Comparator<View> cmp,
             DedupPolicy policy) {
-        // TODO 4a: Call dedupMergeSortRecursive(), passing in a copy of the `views` array. Use its
-        //  return value to obtain the return value for this method.
-        throw new UnsupportedOperationException();
+
+        int begin = 0; int end = views.length;
+        View[] viewsCopy = copyOfRange(views, begin, end);
+        View[] work = new View[end];
+
+        int k = dedupMergeSortRecursive(viewsCopy, work, begin, end, cmp, policy);
+
+        // Exclude empty entries in viewsCopy
+        return copyOfRange(viewsCopy, begin, k);
     }
 
     /**
@@ -144,8 +150,19 @@ public class DataUtilities {
      */
     static int dedupMergeSortRecursive(View[] views, View[] work, int begin, int end,
             Comparator<View> cmp, DedupPolicy policy) {
-        // TODO 4b: Implement recursive merge sort.
-        throw new UnsupportedOperationException();
+
+        if (end - begin <= 1) {
+            return end;
+        }
+
+        int mid = begin + (end-begin)/2;
+
+        int kLeft = dedupMergeSortRecursive(views, work, begin, mid, cmp, policy);
+        int kRight = dedupMergeSortRecursive(views, work, mid, end, cmp, policy);
+
+        int k = merge(views, work, begin, kLeft, mid, kRight, cmp, policy);
+
+        return k;
     }
 
     /**
