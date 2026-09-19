@@ -162,7 +162,73 @@ public class DataUtilities {
     @SuppressWarnings("SameParameterValue")
     static int merge(View[] views, View[] work, int leftBegin, int leftEnd,
             int rightBegin, int rightEnd, Comparator<View> cmp, DedupPolicy policy) {
-        // TODO 3: Implement this method according to its specifications.
-        throw new UnsupportedOperationException();
+
+        // O(leftEnd-leftBegin)
+        for (int i = leftBegin; i < leftEnd; i++) {
+            work[i-leftBegin] = views[i];
+        }
+        int workLength = leftEnd-leftBegin;
+
+        int k = leftBegin; // the current position in the merged subarray
+        int leftPos = 0; // the current position in `work`
+        int rightPos = rightBegin; // the current position in `views`
+
+
+        while (leftPos < workLength && rightPos < rightEnd) {
+            if (cmp.compare(work[leftPos], views[rightPos]) < 0) {
+                views[k] = work[leftPos]; // use the smaller one (left)
+                leftPos++;
+                k++;
+            }
+            else if (cmp.compare(work[leftPos], views[rightPos]) > 0) {
+                views[k] = views[rightPos]; // use the smaller one (right)
+                rightPos++;
+                k++;
+            }
+            else {
+                if (policy == DedupPolicy.KEEP_FIRST) {
+                    views[k] = work[leftPos]; // the first occurrence is on the left
+                    leftPos++;
+                    rightPos++; // move on to next element since this duplicate won't be included
+                    k++;
+                }
+                else if (policy == DedupPolicy.KEEP_LAST) {
+                    views[k] = views[rightPos]; // the last occurrence is on the left
+                    rightPos++;
+                    leftPos++; // move on to next element since this duplicate won't be included
+                    k++;
+                }
+                else { // KEEP_ALL
+                    // preserve relative order (left, right)
+                    views[k] = work[leftPos];
+                    leftPos++;
+                    k++;
+                }
+
+            }
+        }
+
+        if (leftPos >= workLength) {
+            /* if all the entries of work are merged, then finish the merged subarray with the
+            remaining entries in views[rightBegin..rightEnd). */
+            while (rightPos < rightEnd) {
+                views[k] = views[rightPos];
+                rightPos++;
+                k++;
+            }
+
+        }
+        else {
+            /* if all the entries of views[rightBegin..rightEnd) are merged, then finish the
+            merged subarray with the remaining entries in work. */
+            while (leftPos < workLength) {
+                views[k] = work[leftPos];
+                leftPos++;
+                k++;
+            }
+        }
+
+        return k;
+
     }
 }

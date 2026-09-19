@@ -123,7 +123,127 @@ public class DataUtilitiesTest {
         View[] work = new View[3];
         merge(views, work, 0, 3, 3, 7, BY_TIMESTAMP, KEEP_ALL);
         assertSorted(views, 0, 7, BY_TIMESTAMP);
+
+        // not unique, leftEnd != rightStart, and work.length != leftEnd-leftBegin, KEEP_ALL
+        views = new View[]{
+                new View("A", "V", LocalDateTime.of(2025, 1, 3, 0, 0)),
+                new View("B", "V", LocalDateTime.of(2025, 1, 5, 0, 0)),
+                new View("C", "V", LocalDateTime.of(2025, 1, 2, 0, 0)),
+                new View("D", "V", LocalDateTime.of(2025, 1, 1, 0, 0)), // leftBegin
+                new View("E", "V", LocalDateTime.of(2025, 1, 1, 0, 0)),
+                new View("F", "V", LocalDateTime.of(2025, 1, 4, 0, 0)),
+                new View("G", "V", LocalDateTime.of(2025, 1, 6, 0, 0)),
+                new View("H", "V", LocalDateTime.of(2025, 1, 7, 0, 0)), // leftEnd
+                new View("I", "V", LocalDateTime.of(2025, 1, 3, 0, 0)),
+                new View("J", "V", LocalDateTime.of(2025, 1, 2, 0, 0)),
+                new View("K", "V", LocalDateTime.of(2025, 1, 1, 0, 0)), // rightBegin
+                new View("L", "V", LocalDateTime.of(2025, 1, 1, 0, 0)),
+                new View("M", "V", LocalDateTime.of(2025, 1, 5, 0, 0)),
+                new View("N", "V", LocalDateTime.of(2025, 1, 3, 0, 0)), // rightEnd
+                new View("O", "V", LocalDateTime.of(2025, 1, 4, 0, 0)),
+        };
+        work = new View[5];
+        merge(views, work, 3, 7, 10, 13, BY_TIMESTAMP, KEEP_ALL);
+        View[] expected = new View[]{
+                new View("A", "V", LocalDateTime.of(2025, 1, 3, 0, 0)),
+                new View("B", "V", LocalDateTime.of(2025, 1, 5, 0, 0)),
+                new View("C", "V", LocalDateTime.of(2025, 1, 2, 0, 0)),
+                new View("D", "V", LocalDateTime.of(2025, 1, 1, 0, 0)), // leftBegin
+                new View("E", "V", LocalDateTime.of(2025, 1, 1, 0, 0)),
+                new View("K", "V", LocalDateTime.of(2025, 1, 1, 0, 0)),
+                new View("L", "V", LocalDateTime.of(2025, 1, 1, 0, 0)),
+                new View("F", "V", LocalDateTime.of(2025, 1, 4, 0, 0)),
+                new View("M", "V", LocalDateTime.of(2025, 1, 5, 0, 0)),
+                new View("G", "V", LocalDateTime.of(2025, 1, 6, 0, 0)),
+                new View("K", "V", LocalDateTime.of(2025, 1, 1, 0, 0)), // k
+                new View("L", "V", LocalDateTime.of(2025, 1, 1, 0, 0)),
+                new View("M", "V", LocalDateTime.of(2025, 1, 5, 0, 0)),
+                new View("N", "V", LocalDateTime.of(2025, 1, 3, 0, 0)),
+                new View("O", "V", LocalDateTime.of(2025, 1, 4, 0, 0)),
+        };
+        assertArrayEquals(expected, views);
+
+
+
+        // not unique, leftEnd != rightStart, and work.length != leftEnd-leftBegin, KEEP_FIRST
+        views = new View[]{
+                new View("A", "V", LocalDateTime.of(2025, 1, 3, 0, 0)),
+                new View("B", "V", LocalDateTime.of(2025, 1, 5, 0, 0)),
+                new View("C", "V", LocalDateTime.of(2025, 1, 2, 0, 0)),
+                new View("D", "V", LocalDateTime.of(2025, 1, 1, 0, 0)), // leftBegin
+                new View("E", "V", LocalDateTime.of(2025, 1, 2, 0, 0)),
+                new View("F", "V", LocalDateTime.of(2025, 1, 4, 0, 0)),
+                new View("G", "V", LocalDateTime.of(2025, 1, 6, 0, 0)),
+                new View("H", "V", LocalDateTime.of(2025, 1, 7, 0, 0)), // leftEnd
+                new View("I", "V", LocalDateTime.of(2025, 1, 3, 0, 0)),
+                new View("J", "V", LocalDateTime.of(2025, 1, 2, 0, 0)),
+                new View("K", "V", LocalDateTime.of(2025, 1, 2, 0, 0)), // rightBegin
+                new View("L", "V", LocalDateTime.of(2025, 1, 3, 0, 0)),
+                new View("M", "V", LocalDateTime.of(2025, 1, 4, 0, 0)),
+                new View("N", "V", LocalDateTime.of(2025, 1, 3, 0, 0)), // rightEnd
+                new View("O", "V", LocalDateTime.of(2025, 1, 4, 0, 0)),
+        };
+        work = new View[5];
+        merge(views, work, 3, 7, 10, 13, BY_TIMESTAMP, KEEP_FIRST);
+        expected = new View[]{
+                new View("A", "V", LocalDateTime.of(2025, 1, 3, 0, 0)),
+                new View("B", "V", LocalDateTime.of(2025, 1, 5, 0, 0)),
+                new View("C", "V", LocalDateTime.of(2025, 1, 2, 0, 0)),
+                new View("D", "V", LocalDateTime.of(2025, 1, 1, 0, 0)), // leftBegin
+                new View("E", "V", LocalDateTime.of(2025, 1, 2, 0, 0)),
+                new View("L", "V", LocalDateTime.of(2025, 1, 3, 0, 0)),
+                new View("F", "V", LocalDateTime.of(2025, 1, 4, 0, 0)),
+                new View("G", "V", LocalDateTime.of(2025, 1, 6, 0, 0)),
+                new View("I", "V", LocalDateTime.of(2025, 1, 3, 0, 0)), // k
+                new View("J", "V", LocalDateTime.of(2025, 1, 2, 0, 0)),
+                new View("K", "V", LocalDateTime.of(2025, 1, 2, 0, 0)),
+                new View("L", "V", LocalDateTime.of(2025, 1, 3, 0, 0)),
+                new View("M", "V", LocalDateTime.of(2025, 1, 4, 0, 0)),
+                new View("N", "V", LocalDateTime.of(2025, 1, 3, 0, 0)),
+                new View("O", "V", LocalDateTime.of(2025, 1, 4, 0, 0)),
+        };
+        assertArrayEquals(expected, views);
+
+        // not unique, leftEnd != rightStart, and work.length != leftEnd-leftBegin, KEEP_LAST
+        views = new View[]{
+                new View("A", "V", LocalDateTime.of(2025, 1, 3, 0, 0)),
+                new View("B", "V", LocalDateTime.of(2025, 1, 5, 0, 0)),
+                new View("C", "V", LocalDateTime.of(2025, 1, 2, 0, 0)),
+                new View("D", "V", LocalDateTime.of(2025, 1, 1, 0, 0)), // leftBegin
+                new View("E", "V", LocalDateTime.of(2025, 1, 2, 0, 0)),
+                new View("F", "V", LocalDateTime.of(2025, 1, 4, 0, 0)),
+                new View("G", "V", LocalDateTime.of(2025, 1, 6, 0, 0)),
+                new View("H", "V", LocalDateTime.of(2025, 1, 7, 0, 0)), // leftEnd
+                new View("I", "V", LocalDateTime.of(2025, 1, 3, 0, 0)),
+                new View("J", "V", LocalDateTime.of(2025, 1, 2, 0, 0)),
+                new View("K", "V", LocalDateTime.of(2025, 1, 2, 0, 0)), // rightBegin
+                new View("L", "V", LocalDateTime.of(2025, 1, 3, 0, 0)),
+                new View("M", "V", LocalDateTime.of(2025, 1, 4, 0, 0)),
+                new View("N", "V", LocalDateTime.of(2025, 1, 3, 0, 0)), // rightEnd
+                new View("O", "V", LocalDateTime.of(2025, 1, 4, 0, 0)),
+        };
+        work = new View[5];
+        merge(views, work, 3, 7, 10, 13, BY_TIMESTAMP, KEEP_LAST);
+        expected = new View[]{
+                new View("A", "V", LocalDateTime.of(2025, 1, 3, 0, 0)),
+                new View("B", "V", LocalDateTime.of(2025, 1, 5, 0, 0)),
+                new View("C", "V", LocalDateTime.of(2025, 1, 2, 0, 0)),
+                new View("D", "V", LocalDateTime.of(2025, 1, 1, 0, 0)), // leftBegin
+                new View("K", "V", LocalDateTime.of(2025, 1, 2, 0, 0)),
+                new View("L", "V", LocalDateTime.of(2025, 1, 3, 0, 0)),
+                new View("M", "V", LocalDateTime.of(2025, 1, 4, 0, 0)),
+                new View("G", "V", LocalDateTime.of(2025, 1, 6, 0, 0)),
+                new View("I", "V", LocalDateTime.of(2025, 1, 3, 0, 0)), // k
+                new View("J", "V", LocalDateTime.of(2025, 1, 2, 0, 0)),
+                new View("K", "V", LocalDateTime.of(2025, 1, 2, 0, 0)),
+                new View("L", "V", LocalDateTime.of(2025, 1, 3, 0, 0)),
+                new View("M", "V", LocalDateTime.of(2025, 1, 4, 0, 0)),
+                new View("N", "V", LocalDateTime.of(2025, 1, 3, 0, 0)),
+                new View("O", "V", LocalDateTime.of(2025, 1, 4, 0, 0)),
+        };
+        assertArrayEquals(expected, views);
     }
+
 
     @DisplayName("WHEN we call `deduplicatingSort()` with KEEP_FIRST on two equivalent and one "
             + "distinct records, THEN the output contains the correct two elements in the correct "
