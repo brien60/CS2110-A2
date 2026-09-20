@@ -42,9 +42,9 @@ public class DataAnalysis {
         int rightIndex = binarySearch(sortedViewsByTimestamp, new View(null, null, end), BY_TIMESTAMP, RIGHT); // O(log N)
 
         /*
-        views[0..leftIndex): timestamps < start
-        views[leftIndex..rightIndex): start <= timestamps <= end
-        views[rightIndex..]: timestamps > end
+        sortedViewsByTimestamp[0..leftIndex): timestamps < start
+        sortedViewsByTimestamp[leftIndex..rightIndex): start <= timestamps <= end
+        sortedViewsByTimestamp[rightIndex..]: timestamps > end
          */
         return rightIndex - leftIndex; // O(1)
     }
@@ -58,14 +58,31 @@ public class DataAnalysis {
      * for each videoID `v1` in this array, if this user viewed `v2` strictly after `v1`, then a
      * view of `v2` will also be present in the array. If `userID` has viewed fewer than `k`
      * distinct videos, then a shorter array containing their latest View of each video is returned.
+     * The worst-case overall runtime complexity of this method is O(NlogN).
      */
     @SuppressWarnings("SameParameterValue")
     static View[] lastKViewedByUser(View[] views, String userID, int k) {
-        // TODO 6: Implement this method according to its specifications. Your definition must use
-        //  the `binarySearch()`, `copyOfRange()`, and/or `deduplicatingSort()` methods of the
-        //  `DataUtilities` class to manipulate the array data. You may not directly access the array
-        //  contents. Label each line of your definition with its worst-case runtime complexity.
-        throw new UnsupportedOperationException();
+        View[] byUserId = deduplicatingSort(views, BY_USER_ID, KEEP_ALL); // O(NlogN + MlogM + UlogU)
+
+        View key = new View(userID, null, null); // O(1)
+        int start = binarySearch(byUserId, key, BY_USER_ID, LEFT); // O(logN)
+        int end = binarySearch(byUserId, key, BY_USER_ID, RIGHT); // O(logN)
+        // All views in byUserId[start, end) have userID `userId`.
+
+        View[] userIDViews = copyOfRange(byUserId, start, end); // O(M)
+        View[] userIDViewsByTime = deduplicatingSort(userIDViews, BY_TIMESTAMP, KEEP_ALL); // O(MlogM)
+        View[] userIDDistinctVideos = deduplicatingSort(userIDViewsByTime, BY_VIDEO_ID, KEEP_LAST); // O(MlogU)
+
+
+        int numDistinctVideos = userIDDistinctVideos.length; // O(1)
+        View[] userIDDistinctVideosByTime = deduplicatingSort(userIDDistinctVideos, BY_TIMESTAMP, KEEP_ALL); // O(UlogU)
+
+        if (numDistinctVideos < k) { // O(1)
+            return userIDDistinctVideosByTime; // O(1)
+        }
+        else {
+            return copyOfRange(userIDDistinctVideosByTime, numDistinctVideos-k, numDistinctVideos); // O(k)
+        }
     }
 
     /**
@@ -79,6 +96,37 @@ public class DataAnalysis {
         //  documenting the invariant of each loop that you write. Your definition must have a
         //  worst-case runtime complexity of `O(N + M log M)`, where `N = views.length` and `M` is
         //  the number of entries of `views` with the given `videoID`.
-        throw new UnsupportedOperationException();
+        int M = 0;
+        View[] entriesWithVideoId = new View[views.length];
+        /* Loop Invariant: M is the number of entries of `views[0..i)` with given `videoID`. */
+        for (int i = 0; i < views.length; i++) { // O(N)
+            if (views[i].videoID().equals(videoID)) {
+                entriesWithVideoId[M] = views[i];
+                M++;
+            }
+        }
+        entriesWithVideoId = copyOfRange(entriesWithVideoId, 0, M); // O(M)
+        View[] entriesWithVideoIdByUserID = deduplicatingSort(entriesWithVideoId, BY_USER_ID, KEEP_ALL); // O(MlogM)
+
+        int maxViewsBySingleUser = 0;
+        String userWithMaxViews = null;
+
+        // M iterations, O(logM) each. Total: O(MlogM)
+        for (int i = 0; i < M; i++) {
+            String user = entriesWithVideoIdByUserID[i].userID();
+            View key = new View(user, null, null);
+
+            int firstViewByUser = binarySearch(entriesWithVideoIdByUserID, key, BY_USER_ID, LEFT);
+            int lastViewByUser = binarySearch(entriesWithVideoIdByUserID, key, BY_USER_ID, RIGHT);
+
+            int viewsBySingleUser = lastViewByUser - firstViewByUser;
+            if (viewsBySingleUser > maxViewsBySingleUser) {
+                maxViewsBySingleUser = viewsBySingleUser;
+                userWithMaxViews = user;
+            }
+        }
+
+        return userWithMaxViews;
+
     }
 }
