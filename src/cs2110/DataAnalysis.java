@@ -33,14 +33,20 @@ public class DataAnalysis {
     /**
      * Returns the number of distinct users who viewed at least one video at a timestamp `t` with
      * `start <= t <= end`.
+     * The worst-case overall runtime complexity of this method is O(NlogN).
      */
     @SuppressWarnings("SameParameterValue")
     static int countDistinctUsersInTimeInterval(View[] views, LocalDateTime start, LocalDateTime end) {
-        // TODO 5: Implement this method according to its specifications. Your definition must use
-        //  the `binarySearch()`, `copyOfRange()`, and/or `deduplicatingSort()` methods of the
-        //  `DataUtilities` class to manipulate the array data. You may not directly access the
-        //  array contents. Label each line of with its worst-case runtime complexity.
-        throw new UnsupportedOperationException();
+        View[] sortedViewsByTimestamp = deduplicatingSort(views, BY_TIMESTAMP, KEEP_ALL); // O(NlogN)
+        int leftIndex = binarySearch(sortedViewsByTimestamp, new View(null, null, start), BY_TIMESTAMP, LEFT); // O(log N)
+        int rightIndex = binarySearch(sortedViewsByTimestamp, new View(null, null, end), BY_TIMESTAMP, RIGHT); // O(log N)
+
+        /*
+        views[0..leftIndex): timestamps < start
+        views[leftIndex..rightIndex): start <= timestamps <= end
+        views[rightIndex..]: timestamps > end
+         */
+        return rightIndex - leftIndex; // O(1)
     }
 
     /**
