@@ -1,6 +1,6 @@
 Assignment 2: Analyzing Video View Data
 
-Assignment completion time (rounded to nearest hour): 6
+Assignment completion time (rounded to nearest hour): 8
 
 [x] the appropriate choice: [x] Worked alone   [] Completed with a partner
 
