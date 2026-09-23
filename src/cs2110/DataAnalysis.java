@@ -37,16 +37,20 @@ public class DataAnalysis {
      */
     @SuppressWarnings("SameParameterValue")
     static int countDistinctUsersInTimeInterval(View[] views, LocalDateTime start, LocalDateTime end) {
-        View[] sortedViewsByTimestamp = deduplicatingSort(views, BY_TIMESTAMP, KEEP_ALL); // O(NlogN)
-        int leftIndex = binarySearch(sortedViewsByTimestamp, new View(null, null, start), BY_TIMESTAMP, LEFT); // O(log N)
-        int rightIndex = binarySearch(sortedViewsByTimestamp, new View(null, null, end), BY_TIMESTAMP, RIGHT); // O(log N)
+        View[] viewsByTimestamp = deduplicatingSort(views, BY_TIMESTAMP, KEEP_ALL); // O(NlogN)
 
-        /*
-        sortedViewsByTimestamp[0..leftIndex): timestamps < start
-        sortedViewsByTimestamp[leftIndex..rightIndex): start <= timestamps <= end
-        sortedViewsByTimestamp[rightIndex..]: timestamps > end
-         */
-        return rightIndex - leftIndex; // O(1)
+        int leftIndex = binarySearch(viewsByTimestamp, new View(null, null, start), BY_TIMESTAMP, LEFT); // O(log N)
+        int rightIndex = binarySearch(viewsByTimestamp, new View(null, null, end), BY_TIMESTAMP, RIGHT); // O(log N)
+
+        /* viewsByTimestamp[0..leftIndex): timestamps < start
+        viewsByTimestamp[leftIndex..rightIndex): start <= timestamps <= end
+        viewsByTimestamp[rightIndex..]: timestamps > end */
+
+        View[] viewsInTimeInterval = copyOfRange(viewsByTimestamp, leftIndex, rightIndex); /* O(N),
+        technically O(# views in time interval), but don't have variable for that. */
+        View[] distinctUsersInTimeInterval = deduplicatingSort(viewsInTimeInterval, BY_USER_ID, KEEP_FIRST); // O(NlogU)
+
+        return distinctUsersInTimeInterval.length; // O(1)
     }
 
     /**
@@ -62,7 +66,7 @@ public class DataAnalysis {
      */
     @SuppressWarnings("SameParameterValue")
     static View[] lastKViewedByUser(View[] views, String userID, int k) {
-        View[] byUserId = deduplicatingSort(views, BY_USER_ID, KEEP_ALL); // O(NlogN + MlogM + UlogU)
+        View[] byUserId = deduplicatingSort(views, BY_USER_ID, KEEP_ALL); // O(NlogN)
 
         View key = new View(userID, null, null); // O(1)
         int start = binarySearch(byUserId, key, BY_USER_ID, LEFT); // O(logN)
@@ -112,7 +116,8 @@ public class DataAnalysis {
         `maxViewsBySingleUser` is the maximum number of views an individual has on the video with
         `videoID` in `entriesWithVideoIdByUserId[..i)`,
 
-        `userWithMaxViews` is the `userID` of the individual with that maximum.
+        `userWithMaxViews` is the `userID` of the individual with that maximum, or null if there
+        are no recorded views for that video.
         */
         for (int i = 0; i < M; i++) {
             String user = entriesWithVideoIdByUserId[i].userID();

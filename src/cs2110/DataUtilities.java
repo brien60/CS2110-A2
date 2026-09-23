@@ -210,7 +210,7 @@ public class DataUtilities {
                     k++;
                 }
                 else if (policy == DedupPolicy.KEEP_LAST) {
-                    views[k] = views[rightPos]; // the last occurrence is on the left
+                    views[k] = views[rightPos]; // the last occurrence is on the right
                     rightPos++;
                     leftPos++; // move on to next element since this duplicate won't be included
                     k++;
